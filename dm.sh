@@ -12,6 +12,8 @@
 #        AUTHOR: VirtualDemon (VD) 
 #       CREATED: 03/01/2019 12:38
 #===============================================================================
+# you can fork me and make me better from : https://github.com/virtualdemon/clidis
+# licensed under GNU GENERAL PUBLIC LICENSE Version 3
 # reset the terminal
 tput reset
 # set colors
