@@ -6,6 +6,7 @@ A command line display manager to start your desktop more intractive!
 1. download the script with curl or wget : 
 	
 	`wget https://raw.githubusercontent.com/virtualdemon/clidis/master/dm.sh -O dm.sh`
+
 	`curl https://raw.githubusercontent.com/virtualdemon/clidis/master/dm.sh -o dm.sh`
 
 2. change script permission : 
