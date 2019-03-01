@@ -60,17 +60,8 @@ if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
 	function startDesktop {
 	desktop="$1"
 	chosenDesktop=${desktops[$desktop]}
-	if [[ $chosenDesktop=="xfce" ]] ; then
-		echo "${greenColor}Starting xfce desktop environment${resetColor}"
-	        startxfce4
-	# add your desktops and commands here!!! 
-	elif [[ $chosenDesktop=="YOUR DESKTOP GOES HERE" ]] ; then
-		echo "${greenColor}Starting YOUR DESKTOP NAME GOES HERE desktop environment${resetColor}"
-		"YOUR CUSTOM COMMAND TO START DESKTOP GOES HERE WITHOUT DOUBLE QOUTES"
-	else
-		echo "${redColor}Your desktop is not included! please fork me on github and make me better!${resetColor}"
-	fi
-	}
+	$(cat /usr/share/xsessions/$chosenDesktop.desktop | grep Exec | sed 's/Exec=//')	
+}
 
 	startDesktop $userChoice
 else 
