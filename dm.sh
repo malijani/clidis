@@ -56,11 +56,14 @@ if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
 		echo "${boldText}${redColor}Error: '$userChoice' is not in range.${resetColor}" >&2
 		exit -1
 	fi
-	# custom function to start desktop environment(uncompleted because i got one desktop environment on my system .xfce4. )
+	# custom function to start desktop environment
 	function startDesktop {
 	desktop="$1"
+	# get the name of desktop environment
 	chosenDesktop=${desktops[$desktop]}
-	$(cat /usr/share/xsessions/$chosenDesktop.desktop | grep Exec | sed 's/Exec=//')	
+	echo "${greenColor} starting $chosenDesktop! please wait... ${resetColor}"
+	# start chosen desktop environment from Exec command in .desktop file!
+	exec $(cat /usr/share/xsessions/$chosenDesktop.desktop | grep Exec | sed 's/Exec=//')	
 }
 
 	startDesktop $userChoice
