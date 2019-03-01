@@ -63,7 +63,9 @@ if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
 	chosenDesktop=${desktops[$desktop]}
 	echo "${greenColor} starting $chosenDesktop! please wait... ${resetColor}"
 	# start chosen desktop environment from Exec command in .desktop file!
-	exec $(cat /usr/share/xsessions/$chosenDesktop.desktop | grep Exec | sed 's/Exec=//')	
+	execCommand=$(cat /usr/share/xsessions/$chosenDesktop.desktop | grep Exec | sed 's/Exec=//')	
+	startCommand=$(which $execCommand)
+	exec startx $startCommand	
 }
 
 	startDesktop $userChoice
