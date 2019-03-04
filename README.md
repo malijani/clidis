@@ -27,7 +27,7 @@ A command line display manager to start your desktop more intractive!
 
     `sudo systemctl disable display-manager.service`
 
-    2. apend the following line into your login shell profile (for `zsh` -> **~/.zprofile** and for `bash` -> **~/.bash_profile**) : 
+2. apend the following line into your login shell profile (for `zsh` -> **~/.zprofile** and for `bash` -> **~/.bash_profile**) : 
     
     `exec bash $HOME/.clidis`
     
