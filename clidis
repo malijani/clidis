@@ -65,14 +65,17 @@ if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
 	function startDesktop {
 		if [[ $1 -eq 0 ]] ; then
 			echo "${greenColor}Welcome to TTY!${resetColor}"
-			exit
+			echo "${greenColor}To logout from current user use <exit> command!${resetColor}"
+			exec $SHELL
 		fi
-		
+		if [ -e ~/.xinitrc ] ; then
+			mv ~/.xinitrc ~/.xinitrc-$(date +%m-%d-%H-%M-%S)-bak
+		fi		
 		# get the name of desktop environment
 		chosenDesktop=$(echo $desktops | tr " " "\n" | sed -n "$1 p")
 		# start chosen desktop environment from Exec command in .desktop file!
 		echo "${greenColor}starting $chosenDesktop ! please wait... ${resetColor}"
-		execCommand=$(grep "^Exec" /usr/share/xsessions/"$chosenDesktop".desktop | sed 's/Exec=//')	
+		execCommand=$(which $(grep "^Exec" /usr/share/xsessions/"$chosenDesktop".desktop | sed 's/Exec=//'))	
 		exec startx "$execCommand"
 	}
 
