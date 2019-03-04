@@ -27,10 +27,13 @@ A command line display manager to start your desktop more intractive!
 
     `sudo systemctl disable display-manager.service`
 
-2. run the following command to add automatic script run after log in : 
-
-    `echo "exec bash $HOME/.clidis" >> $HOME/.profile`
+2. apend the following line into your login shell profile (for `zsh` ~> **~/.zprofile** and for `bash` **~/.bash_profile**) : 
     
+    `exec bash $HOME/.clidis`
+    
+    if you don't know what's your login shell, just run this command : 
+    
+    `echo $SHELL`
     
 ### MORE
 
