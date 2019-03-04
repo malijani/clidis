@@ -65,7 +65,7 @@ if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
 	function startDesktop {
 		if [[ $1 -eq 0 ]] ; then
 			echo "${greenColor}Welcome to TTY!${resetColor}"
-			echo "${greenColor}To logout from current user use <exit> command!${resetColor}"
+			echo "${boldText}${blueColor}To logout from current user use <exit> command!${resetColor}"
 			exec $SHELL
 		fi
 		if [ -e ~/.xinitrc ] ; then
