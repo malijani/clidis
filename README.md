@@ -23,7 +23,7 @@ A command line display manager to start your desktop more intractive!
 
 	`chmod +x ~/clidis`
 
-3. run it from tty when no DE is running : 
+3. run it from tty when no graphical environment is running : 
 
 	`~/clidis`
 
