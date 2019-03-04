@@ -14,6 +14,7 @@
 #===============================================================================
 # you can fork me and make me better from : https://github.com/virtualdemon/clidis
 # licensed under GNU GENERAL PUBLIC LICENSE Version 3
+
 # reset the terminal
 tput reset
 # set colors
@@ -51,7 +52,7 @@ if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
 	done
 	echo -e "\n"
 	# get the number of printed desktop from user
-	read -p $'\e[35mPlease choose the NUMBER of your installed desktop environment :\e[0m ' userChoice
+	read -p $'\e[35mPlease choose the NUMBER of your installed DE or WM :\e[0m ' userChoice
 	# check user input 
 	if [[ ! $userChoice || $userChoice = *[^0-9]* ]]; then
     		echo "${boldText}${redColor}Error: '$userChoice' is not a number.${resetColor}" >&2
@@ -67,7 +68,7 @@ if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
 			exit
 		fi
 		
-		# get the name of desktop environment
+		# get the name of desktop environment (the $desktops var is not an array!)
 		chosenDesktop=$(echo $desktops | tr " " "\n" | sed -n "$1 p")
 		# start chosen desktop environment from Exec command in .desktop file!
 		echo "${greenColor}starting $chosenDesktop ! please wait... ${resetColor}"
@@ -77,5 +78,5 @@ if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
 
 	startDesktop "$userChoice"
 else 
-	echo "${redColor}You're already running a desktop environment.${resetColor}"
+	echo "${redColor}You're already running a graphical environment.${resetColor}"
 fi
