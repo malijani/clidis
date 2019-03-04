@@ -2,7 +2,8 @@
 A command line display manager to start your desktop more intractive!
 
 ![clidis preview](https://raw.githubusercontent.com/virtualdemon/clidis/master/screenshot/screenshot.png)
-    ![RepoSize](https://img.shields.io/github/repo-size/virtualdemon/clidis.svg?style=flat-square) ![Contributors](https://img.shields.io/github/contributors/virtualdemon/clidis.svg?style=flat-square)
+
+![RepoSize](https://img.shields.io/github/repo-size/virtualdemon/clidis.svg?style=flat-square) ![Contributors](https://img.shields.io/github/contributors/virtualdemon/clidis.svg?style=flat-square)
     
 ## HOW TO USE
 
