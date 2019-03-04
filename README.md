@@ -9,11 +9,11 @@ A command line display manager to start your desktop more intractive!
 
 	`curl https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -o ~/clidis`
 	
-	or clone this repository and make a soft link from script!:
+or clone this repository and make a soft link from script!:
 		
-		`git clone https://github.com/virtualdemon/clidis ~/.clidis`
+	`git clone https://github.com/virtualdemon/clidis ~/.clidis`
 		
-		`ln -sf ~/.clidis/clidis ~/clidis`
+	`ln -sf ~/.clidis/clidis ~/clidis`
 
 2. change script permission (just once!) : 
 
