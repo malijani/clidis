@@ -38,6 +38,6 @@ A command line display manager to start your desktop more intractive!
 ### MORE
 
 >  special thanks to : 
-    MisterH (for testing)
+    MisterH
     
 Made with :heart: for cli users!
