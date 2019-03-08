@@ -34,7 +34,6 @@ if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
  __  | |     __|      , 
 /    |/  |  /  |  |  / \_
 \___/|__/|_/\_/|_/|_/ \/ 	
-
 	${resetColor}"
 	# get the desktop lists without .desktop extension from /usr/share/xsessions
 	desktops=$(ls /usr/share/xsessions/ | sed 's/.desktop//g')
