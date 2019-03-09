@@ -304,7 +304,10 @@ function installClidis {
 
 # function to uninstall clidis
 function uninstallClidis {
-		# check the systemDefault display manager and use it 
+	# remove config path
+	echo "removing $configPath"
+	rm -rf $configPath 2>&1 > /dev/null
+	# check the systemDefault display manager and use it 
 	if [[ ! -z $systemDefaultDisplayManager ]] ; then 
 		if [ ! $(systemctl is-enabled display-manager) ] ; then
 			echo "enabling $systemDefaultDisplayManager ! please confirm root access!"
