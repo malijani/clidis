@@ -304,18 +304,82 @@ function installClidis {
 
 # function to uninstall clidis
 function uninstallClidis {
-	echo ""
+		# check the systemDefault display manager and use it 
+	if [[ ! -z $systemDefaultDisplayManager ]] ; then 
+		if [ ! $(systemctl is-enabled display-manager) ] ; then
+			echo "enabling $systemDefaultDisplayManager ! please confirm root access!"
+			sudo systemctl enable $systemDefaultDisplayManager
+			echo "$systemDefaultDisplayManager is enabled now"
+		else
+			echo "There's a problem! your display manager is enabled! please check it : systemctl status display-manager.service"
+		fi
+	else
+		echo "I don't know your display manager service name! maybe your installed clidis manually so you can't remove it automatically... just give me your display manger name : "
+		while true ; do
+			read -p "Please type your installed display manager name (lightdm, ssdm, gdm,...) : " displayManager
+			if [ $(which $displayManager) ] ; then
+				sudo systemctl enable $displayManager
+				echo "$displayManager is enabled now."
+				break
+			else
+				echo "The $displayManger doesn't exist on your system. please try again."
+				sleep 5
+				clear
+			fi
+		done
+	fi
+	# disable clidis after login
+	if [[ $(echo $SHELL | grep bash) ]] ; then
+	       if [[ $(grep "exec bash $HOME/.clidis"  ~/.bash_profile) ]] ; then
+		       sed -i.bak "/clidis/d" ~/.bash_profile
+	       else
+		       echo "clidis doesn't enabled in $HOME/.bash_profile !"
+	       fi
+	elif [[ $(echo $SHELL | grep zsh) ]] ; then
+		if [[ $(grep "exec bash $HOME/.clidis"  ~/.zprofile) ]] ; then
+			sed -i.bak "/clidis/d" ~/.zprofile 
+		else
+			echo "clidis doesn't enabled in $HOME/.zprofile !"
+		fi
+	elif [[ $(echo $SHELL | grep fish) ]] ; then
+	       	if [[ $(grep "exec bash $HOME/.clidis"  ~/.config/fish/config.fish) ]] ; then
+		       	sed -i.bak "/clidis/d" ~/.config/fish/config.fish 
+		else
+			echo "clidis doesn't enabled in $HOME/.config/fish/config.fish !"
+		fi
+	else
+		while true ; do
+			read -p "Please give me your login shell profile path : " loginShellProfilePath
+			if [ -f $loginShellProfilePath ] ; then
+				sed -i.bak "/clidis/d" $loginShellProfilePath
+				break
+			fi
+		done
+	fi
+	echo "done! please reboot your system to see what happend!"
+	exit
 }
 
-
-if [[ $1 = @(-i|--install) ]] ; then
+# install clidis if there's -i or --install agument exist
+if [[ ! -z $1 && $1 = @(-i|--install) ]] ; then
 	# reset the terminal
+	tput reset
+	# install it!
 	installClidis
 fi
 
 
+# uninstall clidis if there's -u or --uninstall argument exist
+if [[ ! -z $1 && $1 = @(-u|--uninstall) ]] ; then
+	# reset the terminal
+	tput reset
+	# uninstall it!
+	uninstallClidis
+fi
+
+
 # main commands
-#if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] ; then
+if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] ; then
 	# reset the terminal
 	tput reset
 	# print the script banner
@@ -323,10 +387,10 @@ fi
 	# show the menu entries for user	
 	menuEntries
 	# pass the desktop name or selected options to startDesktop function
-	echo "selected ${options[$choice]}"
-	#startDesktop ${options[$choice]}
-#else
-	#echo "Error : Another Xserver is running!, Abort."
-	#exit -1
-#fi
+	#echo "selected ${options[$choice]}"
+	startDesktop ${options[$choice]}
+else
+	echo "Error : Another Xserver is running!, Abort."
+	exit -1
+fi
 
