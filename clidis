@@ -38,13 +38,13 @@ boldText=$(tput bold)
 # information text color
 [[ -z $informationTextColor ]] && informationTextColor=$(tput setaf 6)
 
-
+# set variables for system status
 [[ -z $showStatus ]] && showStatus=1
 [[ -z $showUserAtHost ]] && showUserAtHost=1
 [[ -z $showLinuxVersion ]] && showLinuxVersion=1
 [[ -z $showTime ]] && showTime=1
 [[ -z $showLinuxDisName ]] && showLinuxDistName=1
-
+[[ -z $showUptime ]] && showUptime=1
 
 # function to print the text in the center of screen
 function center {
@@ -124,7 +124,7 @@ function systemStatus {
 		# check kernel release
 		[[ $showLinuxVersion -eq 1 ]] && center "$(uname -s -r)"
 		# print time
-		[[ $showTime -eq 1 ]] && center "$(date +%H:%M)"
+		[[ $showTime -eq 1 ]] && center "time -> $(date +%H:%M)"
 		if [[ $showLinuxDistName -eq 1 ]] ; then
 			# check OS release version and name
 			if [ -f /etc/os-release ]; then
@@ -152,8 +152,10 @@ function systemStatus {
 			fi
 			center "$operatingSystem $operatingSystemVersion"
 		fi
-			# reset the color
-			echo "${resetColor}"
+		# print uptime
+		[[ $showUptime -eq 1 ]] && DIFF_SEC=$(($(date +%s)-$(date +%s -d "$(uptime -s)"))) && center "uptime -> $(($DIFF_SEC/3600)):$(($DIFF_SEC%3600/60))"
+		# reset the color
+		echo "${resetColor}"
 	fi
 }
 
@@ -243,7 +245,7 @@ function menuEntries {
 
 # function to install clidis
 function installClidis {
-	echo ""
+	
 }
 
 # function to uninstall clidis
