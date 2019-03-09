@@ -250,17 +250,25 @@ function menuEntries {
 
 # function to install clidis
 function installClidis {
-	# download clidis in $HOME/.clidis
-	if [[ ! -e "$HOME/.clidis" ]] ;then 
-		if [ -e "$(pwd)/clidis" ] ; then
-			cp "$(pwd)/clidis" "$HOME/.clidis"
-		else
-			echo "downloading clidis in $HOME/.clidis"
-			[ $(which curl 2>&1 > /dev/null) ] && curl https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -o $HOME/.clidis 
-			[ $(which wget 2>&1 > /dev/null) ] && wget https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -O $HOME/.clidis
-		fi
-		chmod +x $HOME/.clidis
+	# check internet connection
+	status=0
+	nc -zw 2 ddg.gg 80
+	ret="$?"
+	if [ "$ret" = 0 -a "$status" = 0 ] ;then
+	   	 echo "downloading clidis script to $HOME/.clidis"
+	    	status=1
+	else
+		echo "please check your internet connection!"
+		exit -1
 	fi
+
+	# download clidis in $HOME/.clidis
+	if [ $(which curl) ] ; then
+	       	curl -s https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -o $HOME/.clidis 
+	elif [ $(which wget ) ] ; then
+	       	wget --quiet https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -O $HOME/.clidis
+	fi
+	chmod +x $HOME/.clidis
 	# disable current display manager and set systemDefaultDisplayManager var in config file to use for uninstallation section
 	if [ $(systemctl is-enabled display-manager) ]; then
 		echo "disabling display manager service"
