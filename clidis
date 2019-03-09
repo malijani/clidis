@@ -1,4 +1,4 @@
-#!/bin/bash - 
+#!/usr/bin/env bash
 #===============================================================================
 #
 #          FILE: clidis 
@@ -15,70 +15,255 @@
 # you can fork me and make me better from : https://github.com/virtualdemon/clidis
 # licensed under GNU GENERAL PUBLIC LICENSE Version 3
 
-# reset the terminal
-tput reset
+
+# use the config file to set static and global variables to make script more compatible and functional
+configPath="$HOME/.config/clidis/"
+configFile="$HOME/.config/clidis/config"
+if [ -e $configFile ] ; then
+	source $configFile 2>&1 > /dev/null
+else
+	mkdir -p $configPath 2>&1 > /dev/null && touch $configFile 2>&1 > /dev/null
+fi
+
+
 # set colors
 resetColor=$(tput sgr0)
-redColor=$(tput setaf 1)
-greenColor=$(tput setaf 2)
-blueColor=$(tput setaf 4)
 boldText=$(tput bold)
-# check if another desktop environment is running
-if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
-	# script banner
-	echo "
-	${boldText} 
-	${blueColor}
-      _                  
-     | | o     |  o      
- __  | |     __|      , 
-/    |/  |  /  |  |  / \_
-\___/|__/|_/\_/|_/|_/ \/ 	
-	${resetColor}"
-	# get the desktop lists without .desktop extension from /usr/share/xsessions
-	desktops=$(ls /usr/share/xsessions/ | sed 's/.desktop//g')
-	# set deCounter for printing the desktop environments
-	deCounter=0
-	# print desktop environments like:  1) xfce
-	for de in ${desktops[@]} ; do
-		if [ $deCounter -eq 0 ] ; then
-			echo "  ${redColor}0${resetColor}) ${greenColor}TTY${resetColor}"
-			((deCounter++))
-		fi
-		echo "  ${redColor}$deCounter${resetColor}) ${greenColor}$de${resetColor}"
-		# increase deCounter until desktop environments finished...
-		((deCounter++))
-	done
-	echo -e "\n"
-	# get the number of printed desktop from user
-	read -p $'\e[35mPlease choose the NUMBER of your installed DE or WM :\e[0m ' userChoice
-	# check user input 
-	if [[ ! $userChoice || $userChoice = *[^0-9]* ]]; then
-    		echo "${boldText}${redColor}Error: '$userChoice' is not a number.${resetColor}" >&2
-		exit -1
-	elif [[ $userChoice -gt $deCounter ]] ; then
-		echo "${boldText}${redColor}Error: '$userChoice' is not in range.${resetColor}" >&2
-		exit -1
-	fi
-	# custom function to start desktop environment
-	function startDesktop {
-		if [[ $1 -eq 0 ]] ; then
-			echo "${greenColor}Welcome to TTY!${resetColor}"
-			echo "${boldText}${blueColor}To logout from current user use <exit> command!${resetColor}"
-			exec $SHELL
-		fi
-		if [ -e ~/.xinitrc ] ; then
-			mv ~/.xinitrc ~/.xinitrc-$(date +%m-%d-%H-%M-%S)-bak
-		fi		
-		# get the name of desktop environment
-		chosenDesktop=$(echo $desktops | tr " " "\n" | sed -n "$1 p")
-		# start chosen desktop environment from Exec command in .desktop file!
-		echo "${greenColor}starting $chosenDesktop ! please wait... ${resetColor}"
-		execCommand=$(which $(grep "^Exec" /usr/share/xsessions/"$chosenDesktop".desktop | sed 's/Exec=//'))	
-		exec startx "$execCommand" 2>&1 > /dev/null
-	}
+# normal text color
+[[ -z $normalTextColor ]] && normalTextColor=$(tput setaf 2)
+# banner color
+[[ -z $bannerTextColor ]] && bannerTextColor=$(tput setaf 4)
+# important text color
+[[ -z $importantTextColor ]] && importantTextColor=$(tput setaf 1)
+# information text color
+[[ -z $informationTextColor ]] && informationTextColor=$(tput setaf 6)
 
-	startDesktop "$userChoice"
-else 
-	echo "${redColor}You're already running a graphical environment.${resetColor}"
-fi
+
+[[ -z $showStatus ]] && showStatus=1
+[[ -z $showUserAtHost ]] && showUserAtHost=1
+[[ -z $showLinuxVersion ]] && showLinuxVersion=1
+[[ -z $showTime ]] && showTime=1
+[[ -z $showLinuxDisName ]] && showLinuxDistName=1
+
+
+# function to print the text in the center of screen
+function center {
+  termwidth="$(tput cols)"
+  padding="$(printf '%0.1s' ' '{1..500})"
+  printf '%*.*s %s %*.*s\n' 0 "$(((termwidth-2-${#1})/2))" "$padding" "$1" 0 "$(((termwidth-1-${#1})/2))" "$padding"
+}
+
+
+# function to create a select menu from an array
+# i didn't write this function! : https://unix.stackexchange.com/questions/146570/arrow-key-enter-menu -> Alexander Klimetschek
+# Renders a text based list of options that can be selected by the
+# user using up, down and enter keys and returns the chosen option.
+#
+#   Arguments   : list of options, maximum of 256
+#                 "opt1" "opt2" ...
+#   Return value: selected index (0 for opt1, 1 for opt2 ...)
+function selectOption {
+    # little helpers for terminal print control and key input
+    ESC=$( printf "\033")
+    cursor_blink_on()  { printf "$ESC[?25h"; }
+    cursor_blink_off() { printf "$ESC[?25l"; }
+    cursor_to()        { printf "$ESC[$1;${2:-1}H"; }
+    print_option()     { center "$1"; }
+    print_selected()   { center "         $ESC[7m$1$ESC[27m"; }
+    get_cursor_row()   { IFS=';' read -sdR -p $'\E[6n' ROW COL; echo ${ROW#*[}; }
+    key_input()        { read -s -n3 key 2>/dev/null >&2
+                         if [[ $key = $ESC[A ]]; then echo up;    fi
+                         if [[ $key = $ESC[B ]]; then echo down;  fi
+                         if [[ $key = ""     ]]; then echo enter; fi; }
+    # initially print empty new lines (scroll down if at bottom of screen)
+    for opt; do printf "\n"; done
+    # determine current screen position for overwriting the options
+    local lastrow=`get_cursor_row`
+    local startrow=$(($lastrow - $#))
+    # ensure cursor and input echoing back on upon a ctrl+c during read -s
+    trap "cursor_blink_on; stty echo; printf '\n'; exit" 2
+    cursor_blink_off
+    local selected=0
+    while true; do
+        # print options by overwriting the last lines
+        local idx=0
+        for opt; do
+            cursor_to $(($startrow + $idx))
+            if [ $idx -eq $selected ]; then
+                print_selected "$opt"
+            else
+                print_option "$opt"
+            fi
+            ((idx++))
+        done
+        # user key control
+        case `key_input` in
+            enter) break;;
+            up)    ((selected--));
+                   if [ $selected -lt 0 ]; then selected=$(($# - 1)); fi;;
+            down)  ((selected++));
+                   if [ $selected -ge $# ]; then selected=0; fi;;
+        esac
+    done
+    # cursor position back to normal
+    cursor_to $lastrow
+    printf "\n"
+    cursor_blink_on
+    # return the selected index
+    return $selected
+}
+
+
+# function to print system status
+function systemStatus {
+	if [[ $showStatus -eq 1 ]] ;then
+		# start prining color
+		echo "${informationTextColor}"
+		# print user@host
+		[[ $showUserAtHost -eq 1 ]] && center "$USER@$(uname -n)"
+		# check kernel release
+		[[ $showLinuxVersion -eq 1 ]] && center "$(uname -s -r)"
+		# print time
+		[[ $showTime -eq 1 ]] && center "$(date +%H:%M)"
+		if [[ $showLinuxDistName -eq 1 ]] ; then
+			# check OS release version and name
+			if [ -f /etc/os-release ]; then
+	    			# freedesktop.org and systemd
+	    			source /etc/os-release
+	   			operatingSystem=$NAME
+	   			operatingSystemVersion=$VERSION_ID
+			elif type lsb_release >/dev/null 2>&1; then
+				# linuxbase.org
+				operatingSystem=$(lsb_release -si)
+				operatingSystemVersion=$(lsb_release -sr)
+			elif [ -f /etc/lsb-release ]; then
+				# For some versions of Debian/Ubuntu without lsb_release command
+				source /etc/lsb-release
+				operatingSystem=$DISTRIB_ID
+				operatingSystemVersion=$DISTRIB_RELEASE
+			elif [ -f /etc/debian_version ]; then
+				# Older Debian/Ubuntu/etc.
+				operatingSystem=Debian
+				operatingSystemVersion=$(cat /etc/debian_version)
+			else
+				# Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
+				operatingSystem=$(uname -s)
+				operatingSystemVersion=$(uname -r)
+			fi
+			center "$operatingSystem $operatingSystemVersion"
+		fi
+			# reset the color
+			echo "${resetColor}"
+	fi
+}
+
+
+# function to print banner
+function printBanner {
+	echo -e "\n"
+	center "	${boldText}${bannerTextColor} ██████╗██╗     ██╗██████╗ ██╗███████╗${resetColor}"
+	center "	${boldText}${bannerTextColor}██╔════╝██║     ██║██╔══██╗██║██╔════╝${resetColor}"
+	center "	${boldText}${bannerTextColor}██║     ██║     ██║██║  ██║██║███████╗${resetColor}"
+	center "	${boldText}${bannerTextColor}██║     ██║     ██║██║  ██║██║╚════██║${resetColor}"
+	center "	${boldText}${bannerTextColor}╚██████╗███████╗██║██████╔╝██║███████║${resetColor}"
+	center "	${boldText}${bannerTextColor} ╚═════╝╚══════╝╚═╝╚═════╝ ╚═╝╚══════╝${resetColor}"
+	systemStatus
+}
+
+
+# function to start desktop environment
+function startDesktop {
+	if [[ $1 == "TTY" ]] ; then
+		tput clear
+		exec $SHELL
+	elif [[ $1 == "reboot" ]] ; then
+		tput clear
+		echo "REBOOTING..."
+		reboot
+	elif [[ $1 == "shutdown" ]] ; then
+		tput clear
+		echo  "SHUTTING DOWN..."
+		shutdown -h now
+	fi
+	if [ -e ~/.xinitrc ] ; then
+		mv ~/.xinitrc ~/.xinitrc-$(date +%m-%d-%H-%M-%S)-bak
+	fi		
+	# start chosen desktop environment from Exec command in .desktop file!
+	echo "${normalTextColor}starting $1 ! please wait... ${resetColor}"
+	execCommand=$(which $(grep "^Exec" /usr/share/xsessions/"$1".desktop | sed 's/Exec=//'))	
+	exec startx "$execCommand" 2>&1 > /dev/null
+}
+
+
+# function to search in array elements
+function containsElement {
+  local e match="$1"
+  shift
+  for e; do [[ "$e" == "$match" ]] && return 0; done
+  return 1
+}
+
+# function to create th menu list entries and controll them with config file
+function menuEntries {
+	# manual for user 
+	center "		${normalTextColor}Select an entry using ${importantTextColor}up/down${normalTextColor} keys and ${importantTextColor}enter${normalTextColor} to confirm:${resetColor}" 
+	# get all installed graphical evironments
+	desktops=$(ls /usr/share/xsessions/ | sed 's/.desktop//g')
+	staticEntries=("TTY" "reboot" "shutdown")
+	# create an array for user choice
+	if [[ ! -z $lastUserChoice ]] ; then
+		# convert string to temporary array 
+		tempArray=($desktops)
+		# delete the last user selection from temp array
+		desktopsUpdate=( "${tempArray[@]/$lastUserChoice}" )
+		# set the first element to last user choice
+		options=("$lastUserChoice" ${desktopsUpdate[@]} ${staticEntries[@]})
+	else
+		# set the options array as default
+		options=($desktops ${staticEntries[@]})
+	fi
+	center "++++++++++++++++"
+	# create select menu from options
+	selectOption "${options[@]}"
+	# set the user choice
+	choice=$?
+	newUserChoice=${options[$choice]}
+	# set user choice to use next time : 
+	containsElement $newUserChoice ${staticEntries[@]} 
+	if [ $? -eq 1 ] ;then	
+		if [[ $(grep "lastUserChoice" $configFile) ]] ; then
+			sed -i "s/lastUserChoice=\"$lastUserChoice\"/lastUserChoice=\"$newUserChoice\"/" $configFile
+		else
+			echo -e "lastUserChoice=\"$newUserChoice\"" >> $configFile
+
+		fi
+	fi
+
+}
+
+# function to install clidis
+function installClidis {
+	echo ""
+}
+
+# function to uninstall clidis
+function uninstallClidis {
+	echo ""
+}
+
+# main commands
+#if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] ; then
+	# reset the terminal
+	tput reset
+	# print the script banner
+	printBanner
+	# show the menu entries for user	
+	menuEntries
+	# pass the desktop name or selected options to startDesktop function
+	echo "selected ${options[$choice]}"
+	#startDesktop ${options[$choice]}
+#else
+	#echo "Error : Another Xserver is running!, Abort."
+	#exit -1
+#fi
+
