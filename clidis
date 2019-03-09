@@ -233,9 +233,9 @@ function menuEntries {
 	# set user choice to use next time : 
 	containsElement $newUserChoice ${staticEntries[@]} 
 	if [ $? -eq 1 ] ;then	
-		if [[ $(grep "^lastUserChoice" $configFile) ]] ; then
+		if [[ $(grep "^lastUserChoice=" $configFile) ]] ; then
 			sed -i "s/lastUserChoice=\"$lastUserChoice\"/lastUserChoice=\"$newUserChoice\"/" $configFile
-		elif [[ $(grep "^#lastUserChoice" $configFile) ]] ; then
+		elif [[ $(grep "^#lastUserChoice=" $configFile) ]] ; then
 			sed -i '/#lastUserChoice/d' $configFile
 			echo -e "lastUserChoice=\"$newUserChoice\"" >> $configFile
 		else
@@ -245,15 +245,74 @@ function menuEntries {
 
 }
 
+
 # function to install clidis
 function installClidis {
-	echo ""
+	# download clidis in ~/.clidis
+	if [[ ! -e $HOME/.clidis ]] ;then 
+		if [ -e ./clidis ] ; then
+			cp ./clidis $HOME/.clidis
+		else
+			echo "downloading clidis in ~/.clidis"
+			[ $(which curl 2>&1 > /dev/null) ] && curl https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -o $HOME/.clidis 
+			[ $(which wget 2>&1 > /dev/null) ] && wget https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -O $HOME/.clidis
+		fi
+		chmod +x $HOME/.clidis
+	fi
+	# disable current display manager and set systemDefaultDisplayManger var in config file to use for uninstallation section
+	if [ $(systemctl is-enabled display-manager) ]; then
+		echo "disabling display manager service"
+		systemDefaultDisplayManger=$(file /etc/systemd/system/display-manager.service |  sed 's:.*/::') 
+		echo "systemDefaultDisplayManager=$systemDefaultDisplayManager" >> $configFile
+		sudo systemctl disable display-manager.service
+	else
+		echo "I didn't find any display-manager service running on your system! maybe it's already disabled or there's a problem with it!"
+		exit -1
+	fi
+	
+	# enable clidis after login
+	clidisAutoStartCommand="exec bash $HOME/.clidis"
+	if [[ $(echo $SHELL | grep bash) ]] ;then 
+		if [[ ! $(grep "$clidisAutoStartCommand"  ~/.bash_profile) ]] ; then
+			echo "$clidisAutoStartCommand" >> ~/.bash_profile 
+		else
+			echo "clidis is already enabled in $HOME/.bash_profile !"
+			exit -1
+		fi
+	elif [[ $(echo $SHELL | grep zsh) ]] ; then
+		if [[ ! $(grep "$clidisAutoStartCommand" ~/.zprofile) ]] ; then
+		       	echo "$clidisAutoStartCommand" >> ~/.zprofile 
+		else
+			echo "clidis is already enabled in $HOME/.zprofile !"
+			exit -1
+		fi
+	elif [[ $(echo $SHELL | grep fish) ]] ; then
+	       if [[ ! $(grep "$clidisAutoStartCommand" ~/.config/fish/config.fish) ]] ; then 
+		       	echo "$clidisAutoStartCommand" >> ~/.config/fish/config.fish
+	       else
+		       	echo "clidis is already enabled in $HOME/.config/fish/config.fish !"
+	       		exit -1
+	       fi
+        else
+		read -p "Please give me your login shell profile path : " loginShellProfilePath
+	        echo $clidisAutoStartCommand >> $loginShellProfilePath
+       	fi
+       	echo "done! please reboot your system to see what happend!"
+	exit
 }
+
 
 # function to uninstall clidis
 function uninstallClidis {
 	echo ""
 }
+
+
+if [[ $1 = @(-i|--install) ]] ; then
+	# reset the terminal
+	installClidis
+fi
+
 
 # main commands
 #if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] ; then
