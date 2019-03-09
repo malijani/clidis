@@ -272,7 +272,7 @@ function installClidis {
 		exit -1
 	fi
 	
-	# enable clidis after login
+	# enable clidis after login	
 	clidisAutoStartCommand="exec bash $HOME/.clidis"
 	if [[ $(echo $SHELL | grep bash) ]] ;then 
 		if [[ ! $(grep "$clidisAutoStartCommand"  ~/.bash_profile 2>&1 > /dev/null) ]] ; then
@@ -334,20 +334,21 @@ function uninstallClidis {
 		done
 	fi
 	# disable clidis after login
+	clidisAutoStartCommand="exec bash $HOME/.clidis"
 	if [[ $(echo $SHELL | grep bash) ]] ; then
-	       if [[ $(grep "exec bash $HOME/.clidis"  ~/.bash_profile) ]] ; then
+	       if [[ $(grep "$clidisAutoStartCommand"  ~/.bash_profile) ]] ; then
 		       sed -i.bak "/clidis/d" ~/.bash_profile
 	       else
 		       echo "clidis doesn't enabled in $HOME/.bash_profile !"
 	       fi
 	elif [[ $(echo $SHELL | grep zsh) ]] ; then
-		if [[ $(grep "exec bash $HOME/.clidis"  ~/.zprofile) ]] ; then
+		if [[ $(grep "$clidisAutoStartCommand"  ~/.zprofile) ]] ; then
 			sed -i.bak "/clidis/d" ~/.zprofile 
 		else
 			echo "clidis doesn't enabled in $HOME/.zprofile !"
 		fi
 	elif [[ $(echo $SHELL | grep fish) ]] ; then
-	       	if [[ $(grep "exec bash $HOME/.clidis"  ~/.config/fish/config.fish) ]] ; then
+	       	if [[ $(grep "$clidisAutoStartCommand"  ~/.config/fish/config.fish) ]] ; then
 		       	sed -i.bak "/clidis/d" ~/.config/fish/config.fish 
 		else
 			echo "clidis doesn't enabled in $HOME/.config/fish/config.fish !"
