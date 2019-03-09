@@ -233,11 +233,13 @@ function menuEntries {
 	# set user choice to use next time : 
 	containsElement $newUserChoice ${staticEntries[@]} 
 	if [ $? -eq 1 ] ;then	
-		if [[ $(grep "lastUserChoice" $configFile) ]] ; then
+		if [[ $(grep "^lastUserChoice" $configFile) ]] ; then
 			sed -i "s/lastUserChoice=\"$lastUserChoice\"/lastUserChoice=\"$newUserChoice\"/" $configFile
+		elif [[ $(grep "^#lastUserChoice" $configFile) ]] ; then
+			sed -i '/#lastUserChoice/d' $configFile
+			echo -e "lastUserChoice=\"$newUserChoice\"" >> $configFile
 		else
 			echo -e "lastUserChoice=\"$newUserChoice\"" >> $configFile
-
 		fi
 	fi
 
@@ -245,7 +247,7 @@ function menuEntries {
 
 # function to install clidis
 function installClidis {
-	
+	echo ""
 }
 
 # function to uninstall clidis
