@@ -252,10 +252,10 @@ function menuEntries {
 function installClidis {
 	# check internet connection
 	if [[ "$(ping -c4 8.8.8.8 2>&1 > /dev/null )" ]]; then
-		echo "downloading clidis into $HOME/.clidis"
-	else
 		echo "Please check the internet connection"
 		exit -1
+	else
+		echo "downloading clidis into $HOME/.clidis"
 	fi
 	# download clidis in $HOME/.clidis
 	if [ $(which curl) ] ; then
