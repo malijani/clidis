@@ -311,7 +311,7 @@ function uninstallClidis {
 	rm -rf $configPath 2>&1 > /dev/null
 	# check the systemDefault display manager and use it 
 	if [[ ! -z $systemDefaultDisplayManager ]] ; then 
-		if [ ! $(systemctl is-enabled display-manager) ] ; then
+		if [ ! $(systemctl is-enabled display-manager 2> /dev/null) ] ; then
 			echo "enabling $systemDefaultDisplayManager ! please confirm root access!"
 			sudo systemctl enable $systemDefaultDisplayManager
 			echo "$systemDefaultDisplayManager is enabled now"
