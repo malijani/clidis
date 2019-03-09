@@ -259,10 +259,10 @@ function installClidis {
 		fi
 		chmod +x $HOME/.clidis
 	fi
-	# disable current display manager and set systemDefaultDisplayManger var in config file to use for uninstallation section
+	# disable current display manager and set systemDefaultDisplayManager var in config file to use for uninstallation section
 	if [ $(systemctl is-enabled display-manager) ]; then
 		echo "disabling display manager service"
-		systemDefaultDisplayManger=$(file /etc/systemd/system/display-manager.service |  sed 's:.*/::') 
+		systemDefaultDisplayManager=$(file /etc/systemd/system/display-manager.service |  sed 's:.*/::') 
 		echo "systemDefaultDisplayManager=$systemDefaultDisplayManager" >> $configFile
 		sudo systemctl disable display-manager.service
 	else
