@@ -251,17 +251,12 @@ function menuEntries {
 # function to install clidis
 function installClidis {
 	# check internet connection
-	status=0
-	nc -zw 2 ddg.gg 80
-	ret="$?"
-	if [ "$ret" = 0 -a "$status" = 0 ] ;then
-	   	 echo "downloading clidis script to $HOME/.clidis"
-	    	status=1
+	if [[ "$(ping -c4 8.8.8.8 2>&1 > /dev/null )" ]]; then
+		echo "downloading clidis into $HOME/.clidis"
 	else
-		echo "please check your internet connection!"
+		echo "Please check the internet connection"
 		exit -1
 	fi
-
 	# download clidis in $HOME/.clidis
 	if [ $(which curl) ] ; then
 	       	curl -s https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -o $HOME/.clidis 
