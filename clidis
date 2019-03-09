@@ -181,10 +181,12 @@ function startDesktop {
 	elif [[ $1 == "reboot" ]] ; then
 		tput clear
 		echo "REBOOTING..."
+		sleep 3
 		reboot
 	elif [[ $1 == "shutdown" ]] ; then
 		tput clear
 		echo  "SHUTTING DOWN..."
+		sleep 3
 		shutdown -h now
 	fi
 	if [ -e ~/.xinitrc ] ; then
@@ -273,22 +275,22 @@ function installClidis {
 	# enable clidis after login
 	clidisAutoStartCommand="exec bash $HOME/.clidis"
 	if [[ $(echo $SHELL | grep bash) ]] ;then 
-		if [[ ! $(grep "$clidisAutoStartCommand"  ~/.bash_profile) ]] ; then
+		if [[ ! $(grep "$clidisAutoStartCommand"  ~/.bash_profile 2>&1 > /dev/null) ]] ; then
 			echo "$clidisAutoStartCommand" >> ~/.bash_profile 
 		else
 			echo "clidis is already enabled in $HOME/.bash_profile !"
 			exit -1
 		fi
 	elif [[ $(echo $SHELL | grep zsh) ]] ; then
-		if [[ ! $(grep "$clidisAutoStartCommand" ~/.zprofile) ]] ; then
+		if [[ ! $(grep "$clidisAutoStartCommand" ~/.zprofile 2>&1 > /dev/null) ]] ; then
 		       	echo "$clidisAutoStartCommand" >> ~/.zprofile 
 		else
 			echo "clidis is already enabled in $HOME/.zprofile !"
 			exit -1
 		fi
 	elif [[ $(echo $SHELL | grep fish) ]] ; then
-	       if [[ ! $(grep "$clidisAutoStartCommand" ~/.config/fish/config.fish) ]] ; then 
-		       	echo "$clidisAutoStartCommand" >> ~/.config/fish/config.fish
+	       if [[ ! $(grep "$clidisAutoStartCommand" ~/.config/fish/config.fish 2>&1 > /dev/null) ]] ; then 
+		       	echo -e "if status --is-login\n\t$clidisAutoStartCommand\nend" >> ~/.config/fish/config.fish
 	       else
 		       	echo "clidis is already enabled in $HOME/.config/fish/config.fish !"
 	       		exit -1
