@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 #===============================================================================
 #
 #          FILE: clidis 
@@ -249,20 +248,42 @@ function menuEntries {
 }
 
 
+# function to download clidis
+function downloadClidis {
+  # check internet connection
+        if [[ "$(ping -c4 8.8.8.8 2>&1 > /dev/null )" ]]; then
+                echo "Please check the internet connection"
+                exit -1
+        else
+                echo "downloading clidis into $HOME/.clidis"
+        fi
+        # download clidis in $HOME/.clidis
+        if [ $(which curl) ] ; then
+                curl -s https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -o $HOME/.clidis 
+        elif [ $(which wget ) ] ; then
+                wget --quiet https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -O $HOME/.clidis
+        fi
+
+}
+
+
 # function to install clidis
 function installClidis {
-	# check internet connection
-	if [[ "$(ping -c4 8.8.8.8 2>&1 > /dev/null )" ]]; then
-		echo "Please check the internet connection"
-		exit -1
+	# if clidis exist in working directory ask to download it or not
+	if [[ -e "$(pwd)/clidis" ]] ; then
+		while true; do
+                        read -p "clidis exist in working directory ! do you want to download latest version of clidis? [y/n] " yesOrNo
+                        case $yesOrNo in
+                                [Yy]* ) echo "downloading the latest version of clidis from github..." && downloadClidis && break
+                                ;;
+				[Nn]* ) echo "coping clidis to $HOME/.clidis" && cp "$(pwd)/clidis" $HOME/.clidis && break
+                                ;;
+                                * ) echo "Please answer yes or no."
+                                ;;
+                        esac
+                done
 	else
-		echo "downloading clidis into $HOME/.clidis"
-	fi
-	# download clidis in $HOME/.clidis
-	if [ $(which curl) ] ; then
-	       	curl -s https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -o $HOME/.clidis 
-	elif [ $(which wget ) ] ; then
-	       	wget --quiet https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -O $HOME/.clidis
+		downloadClidis
 	fi
 	chmod +x $HOME/.clidis
 	# disable current display manager and set systemDefaultDisplayManager var in config file to use for uninstallation section
@@ -272,13 +293,23 @@ function installClidis {
 		echo "systemDefaultDisplayManager=$systemDefaultDisplayManager" >> $configFile
 		sudo systemctl disable display-manager.service
 	else
-		echo "I didn't find any display-manager service running on your system! maybe it's already disabled or there's a problem with it!"
-		exit -1
+		# in this moment controller findout there's no display-manager is working on system....
+		while true; do
+			read -p "I didn't find out any display manager working on your system(maybe it's already disabled)! do you wish to install clidis script? [y/n] " yesOrNo
+    			case $yesOrNo in
+        			[Yy]* ) echo "continuing..." ; break
+				;;
+        			[Nn]* ) echo "quiting" ; exit
+				;;
+        			* ) echo "Please answer yes or no."
+				;;
+    			esac
+		done
 	fi
-	
 	# enable clidis after login	
 	clidisAutoStartCommand="exec bash $HOME/.clidis"
 	if [[ $(echo $SHELL | grep bash) ]] ;then 
+		[[ ! -e "$HOME/.bash_profile" ]] && touch $HOME/.bash_profile
 		if [[ ! $(grep "$clidisAutoStartCommand"  $HOME/.bash_profile 2>&1 > /dev/null) ]] ; then
 			echo "$clidisAutoStartCommand" >> $HOME/.bash_profile 
 		else
@@ -286,6 +317,7 @@ function installClidis {
 			exit -1
 		fi
 	elif [[ $(echo $SHELL | grep zsh) ]] ; then
+		[[ ! -e "$HOME/.zprofile" ]] && touch $HOME/.zprofile
 		if [[ ! $(grep "$clidisAutoStartCommand" $HOME/.zprofile 2>&1 > /dev/null) ]] ; then
 		       	echo "$clidisAutoStartCommand" >> $HOME/.zprofile 
 		else
@@ -293,7 +325,8 @@ function installClidis {
 			exit -1
 		fi
 	elif [[ $(echo $SHELL | grep fish) ]] ; then
-	       if [[ ! $(grep "$clidisAutoStartCommand" $HOME/.config/fish/config.fish) ]] ; then 
+		[[ ! -e "$HOME/.config/fish/config.fish" ]] && touch $HOME/.config/fish/config.fish
+	        if [[ ! $(grep "$clidisAutoStartCommand" $HOME/.config/fish/config.fish) ]] ; then 
 		       	echo -e "if status --is-login\n\t$clidisAutoStartCommand\nend" >> $HOME/.config/fish/config.fish
 	       else
 		       	echo "clidis is already enabled in $HOME/.config/fish/config.fish !"
@@ -340,18 +373,21 @@ function uninstallClidis {
 	# disable clidis after login
 	clidisAutoStartCommand="exec bash $HOME/.clidis"
 	if [[ $(echo $SHELL | grep bash) ]] ; then
-	       if [[ $(grep "$clidisAutoStartCommand"  $HOME/.bash_profile) ]] ; then
+	       [[ ! -e "$HOME/.bash_profile" ]] && touch $HOME/.bash_profile
+		if [[ $(grep "$clidisAutoStartCommand"  $HOME/.bash_profile) ]] ; then
 		       sed -i.bak "/clidis/d" $HOME/.bash_profile
 	       else
 		       echo "clidis doesn't enabled in $HOME/.bash_profile !"
 	       fi
 	elif [[ $(echo $SHELL | grep zsh) ]] ; then
+		[[ ! -e "$HOME/.zprofile" ]] && touch $HOME/.zprofile
 		if [[ $(grep "$clidisAutoStartCommand"  $HOME/.zprofile) ]] ; then
 			sed -i.bak "/clidis/d" $HOME/.zprofile 
 		else
 			echo "clidis doesn't enabled in $HOME/.zprofile !"
 		fi
 	elif [[ $(echo $SHELL | grep fish) ]] ; then
+		[[ ! -e "$HOME/.config/fish/config.fish" ]] && touch $HOME/.config/fish/config.fish
 	       	if [[ $(grep "$clidisAutoStartCommand"  $HOME/.config/fish/config.fish) ]] ; then
 		       	sed -i.bak "/clidis/d" $HOME/.config/fish/config.fish 
 		else
@@ -369,6 +405,7 @@ function uninstallClidis {
 	echo "done! please reboot your system to see what happend!"
 	exit
 }
+
 
 # install clidis if there's -i or --install agument exist
 if [[ ! -z $1 && $1 = @(-i|--install) ]] ; then
