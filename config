@@ -1,0 +1,17 @@
+# do you wanna see how many color codes you can use? just run this command in your terminal :
+# for i in {1..255} ; do  echo "$(tput setaf $i) color $i $(tput sgr 0)" ; done
+bannerTextColor=$(tput setaf 1)
+informationTextColor=$(tput setaf 2)
+importantTextColor=$(tput setaf 4)
+normalTextColor=$(tput setaf 12)
+
+# if you set showStatus=0 none of the system status which is setted in script will display
+showStatus=1
+showUserAtHost=1
+showLinuxVersion=1
+showTime=0
+showLinuxDistName=1
+showUptime=0
+
+
+lastUserChoice="i3"
