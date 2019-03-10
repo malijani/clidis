@@ -425,6 +425,21 @@ if [[ ! -z $1 && $1 = @(-u|--uninstall) ]] ; then
 fi
 
 
+# just test clidis to see what's happening in this script?....
+if [[ ! -z $1 && $1 == @(-t|--test-mode) ]] ; then
+        # reset the terminal
+        tput reset
+        # print the script banner
+        printBanner
+        # show the menu entries for user        
+        menuEntries
+        # pass the desktop name or selected options to startDesktop function
+        #echo "selected ${options[$choice]}"
+        center " you selected \"${options[$choice]}\" item"
+	exit
+fi
+
+
 # main commands
 if [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] ; then
 	# reset the terminal
