@@ -206,20 +206,23 @@ function containsElement {
   return 1
 }
 
+centerText (){
+  w=$(stty size | cut -d" " -f2)
+  b=`echo $1|sed -e 's/\${.*}//g'`
+  l=${#b} 
+  printf "%"$((  ((w/2)+l) - (l/3) ))"s" "$1" 
+}
+
+newline(){
+  echo ""
+}
 # function to create th menu list entries and controll them with config file
 function menuEntries {
 	# manual for user 
-	echo -n "${normalTextColor}"
-	center "Select an entry using" 
-	echo -n "${importantTextColor}" 
-	center "up/down" 
-	echo -n "${normalTextColor}" 
-	center " keys and "
-	echo -n "${importantTextColor}"
-	center "enter"
-	echo -n "${normalTextColor}"
-	center " to confirm:"
-	echo -n "${resetColor}" 
+	newline
+	centerText "${normalTextColor} Select an entry using ${importantTextColor} up/down ${normalTextColor} keys and ${importantTextColor}enter${normalTextColor} to confirm: ${resetColor}" 
+	newline
+	newline
 	# get all installed graphical evironments
 	desktops=$(ls /usr/share/xsessions/ | sed 's/.desktop//g')
 	staticEntries=("TTY" "reboot" "shutdown")
@@ -235,7 +238,6 @@ function menuEntries {
 		# set the options array as default
 		options=($desktops ${staticEntries[@]})
 	fi
-	center "++++++++++++++++"
 	# create select menu from options
 	selectOption "${options[@]}"
 	# set the user choice
