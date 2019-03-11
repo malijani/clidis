@@ -88,13 +88,15 @@ function selectOption {
         for opt; do
             cursor_to $(($startrow + $idx))
             if [ $idx -eq $selected ]; then
+       			printf "\33[%dm"  "$((RANDOM%7+31))"
                 print_selected "$opt"
             else
+
+        		printf "\33[%dm"  "$((RANDOM%7+31))"
                 print_option "$opt"
             fi
             ((idx++))
         done
-        printf "\33[%dm"  "$((RANDOM%7+31))"
         # user key control
         case `key_input` in
             enter) break;;
