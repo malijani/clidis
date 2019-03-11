@@ -94,7 +94,7 @@ You can enable or disable showing system status under the clidis logo and tweak 
 
 >  Special thanks to : 
 
-    **MisterH**, **sudoMicroRobot**
+>  **MisterH**, **sudoMicroRobot**
 
 Made with :heart: for cli users!
 
