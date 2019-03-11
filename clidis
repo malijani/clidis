@@ -94,6 +94,7 @@ function selectOption {
             fi
             ((idx++))
         done
+        printf "\33[%dm"  "$((RANDOM%7+31))"
         # user key control
         case `key_input` in
             enter) break;;
@@ -219,7 +220,6 @@ newline(){
 # function to create th menu list entries and controll them with config file
 function menuEntries {
 	# manual for user 
-	newline
 	centerText "${normalTextColor} Select an entry using ${importantTextColor} up/down ${normalTextColor} keys and ${importantTextColor}enter${normalTextColor} to confirm: ${resetColor}" 
 	newline
 	newline
