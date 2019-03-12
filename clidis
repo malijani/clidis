@@ -106,13 +106,11 @@ function selectOption {
     # ensure cursor and input echoing back on upon a ctrl+c during read -s
     trap "cursor_blink_on; stty echo; printf '\n'; exit" 2
     cursor_blink_off
+    stty -echo
     local selected=0
     while true; do
         # print options by overwriting the last lines
         local idx=0
-        
-        stty -echo
-
         for opt; do
             if [ $idx -eq $selected ]; then
 
@@ -128,9 +126,6 @@ function selectOption {
             fi
             ((idx++))
         done
-
-    	stty echo
-
         # user key control
         case `key_input` in
             enter) break;;
@@ -145,6 +140,7 @@ function selectOption {
     printf "\n"
     cursor_blink_on
     # return the selected index
+    stty echo
     return $selected
 }
 
