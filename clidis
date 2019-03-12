@@ -27,14 +27,22 @@ fi
 # set colors
 resetColor=$(tput sgr0)
 boldText=$(tput bold)
+
+#background main page 
+sysPageColor="47"
+
+# color name text desktop and .... 
+InfoDesktop="35"
+
+colorBtnSelection="31"
 # normal text color
-[[ -z $normalTextColor ]] && normalTextColor=$(tput setaf 2)
+[[ -z $normalTextColor ]] && normalTextColor=$(tput setaf 4)
 # banner color
 [[ -z $bannerTextColor ]] && bannerTextColor=$(tput setaf 4)
 # important text color
 [[ -z $importantTextColor ]] && importantTextColor=$(tput setaf 1)
 # information text color
-[[ -z $informationTextColor ]] && informationTextColor=$(tput setaf 6)
+[[ -z $informationTextColor ]] && informationTextColor=$(tput setaf 3)
 
 # set variables for system status
 [[ -z $showStatus ]] && showStatus=1
@@ -44,12 +52,27 @@ boldText=$(tput bold)
 [[ -z $showLinuxDisName ]] && showLinuxDistName=1
 [[ -z $showUptime ]] && showUptime=1
 
-# function to print the text in the center of screen
-function center {
-	termwidth="$(stty size | cut -d" " -f2)"
-	padding="$(printf '%0.0000001s' ' '{1..500})"
-	printf '%*.*s %s %*.*s\n' 0 "$(((termwidth-2-${#1})/2))" "$padding" "$1" 0 "$(((termwidth-1-${#1})/2))" "$padding"
+
+
+#move cursor in terminal  
+function gotoxy {
+	printf "\33[%d;%df%s" "$2" "$1" "$3"
 }
+# clear page with color and background color changer 
+function pageColor {
+	w=$(tput cols)
+	h=$(tput lines)
+	printf "\e[%dm" "$1"
+	if [[ "$2" == "clear" ]] ;then
+		for y in  $( seq $h ); do
+			for x in  $( seq $w ); do
+				gotoxy "$x" "$y" " "
+			done
+		done
+		gotoxy "0" "0" " "
+	fi
+}
+
 # spaces function center text in space
 function spaces  {
 	txt="$1"
@@ -72,6 +95,31 @@ function spaces  {
 	printf "%s" "$space"
 }
 
+# set location text in center spaces  
+centerText (){
+  pageColor "$sysPageColor"
+  w=$(stty size | cut -d" " -f2)
+  b=`echo $1|sed -e 's/\${.*}//g'`
+  l=${#b} 
+  printf "%"$((  ((w/2)+l) - (l/3) ))"s" "$1" 
+}
+
+# move cursor to new line 
+newline(){
+
+  echo ""
+}
+
+
+# function to print the text in the center of screen
+function center {
+	pageColor "$sysPageColor"
+	termwidth="$(stty size | cut -d" " -f2)"
+	padding="$(printf '%0.0000001s' ' '{1..500})"
+	printf '%*.*s %s %*.*s\n' 0 "$(((termwidth-2-${#1})/2))" "$padding" "$1" 0 "$(((termwidth-1-${#1})/2))" "$padding"
+}
+
+
 # function to create a select menu from an array
 # i didn't write this function! : https://unix.stackexchange.com/questions/146570/arrow-key-enter-menu -> Alexander Klimetschek
 # Renders a text based list of options that can be selected by the
@@ -88,7 +136,7 @@ function selectOption {
     cursor_to()        { printf "$ESC[$1;${2:-1}H"; }
     print_selected() { 
     	text=`spaces "$1"  "60"`
-	air=$(sed -e 's/[^ <>]/ /g' <<< $text)
+		air=$(sed -e 's/[^ <>]/ /g' <<< $text)
     	center "         $ESC[7m$air$ESC[27m"; 
     	center "         $ESC[7m$text$ESC[27m"; 
     	center "         $ESC[7m$air$ESC[27m"; 
@@ -115,12 +163,12 @@ function selectOption {
             if [ $idx -eq $selected ]; then
 
             	cursor_to $(($startrow))
-       			printf "\33[1;32m"
+				printf "\33[0;%dm" "$InfoDesktop"
             	center "You'r Selected : $# / "$((selected+1)) 
             	cursor_to $(($startrow+2))
             	center "`echo -n "{${options[*]}}" |sed 's/ / , /g' |sed 's/{/{ /g'|sed 's/}/ }/g'`"
-            	cursor_to $(($startrow + 4))
-       			printf "\33[0;%dm"  "$((RANDOM%7+31))"
+            	cursor_to $(($startrow + 5))
+       			printf "\33[%dm"  "$colorBtnSelection"
                 print_selected "$opt"
        			printf "\33[0m"
             fi
@@ -136,7 +184,7 @@ function selectOption {
         esac
     done
     # cursor position back to normal
-    cursor_to $lastrow
+    cursor_to $((lastrow+1))
     printf "\n"
     cursor_blink_on
     # return the selected index
@@ -193,6 +241,9 @@ function systemStatus {
 
 # function to print banner
 function printBanner {
+	#clear and change background page 
+	pageColor "$sysPageColor" "clear"
+
 	echo -e "\n${boldText}${bannerTextColor}"
 	center " ██████╗██╗     ██╗██████╗ ██╗███████╗"
 	center "██╔════╝██║     ██║██╔══██╗██║██╔════╝"
@@ -239,16 +290,6 @@ function containsElement {
   return 1
 }
 
-centerText (){
-  w=$(stty size | cut -d" " -f2)
-  b=`echo $1|sed -e 's/\${.*}//g'`
-  l=${#b} 
-  printf "%"$((  ((w/2)+l) - (l/3) ))"s" "$1" 
-}
-
-newline(){
-  echo ""
-}
 # function to create th menu list entries and controll them with config file
 function menuEntries {
 	# manual for user 
