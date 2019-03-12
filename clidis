@@ -119,7 +119,7 @@ function selectOption {
             	cursor_to $(($startrow+2))
             	center "`echo -n "{${options[*]}}" |sed 's/ / , /g' |sed 's/{/{ /g'|sed 's/}/ }/g'`"
             	cursor_to $(($startrow + 4))
-       			printf "\33[1;2;%dm"  "$((RANDOM%7+31))"
+       			printf "\33[0;%dm"  "$((RANDOM%7+31))"
                 print_selected "$opt"
        			printf "\33[0m"
             fi
