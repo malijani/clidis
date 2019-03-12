@@ -14,8 +14,6 @@
 #===============================================================================
 # you can fork me and make me better from : https://github.com/virtualdemon/clidis
 # licensed under GNU GENERAL PUBLIC LICENSE Version 3
-
-
 # use the config file to set static and global variables to make script more compatible and functional
 configPath="$HOME/.config/clidis/"
 configFile="$HOME/.config/clidis/config"
@@ -52,7 +50,27 @@ function center {
 	padding="$(printf '%0.0000001s' ' '{1..500})"
 	printf '%*.*s %s %*.*s\n' 0 "$(((termwidth-2-${#1})/2))" "$padding" "$1" 0 "$(((termwidth-1-${#1})/2))" "$padding"
 }
+# spaces function center text in space
+function spaces  {
+	txt="$1"
+	num="$2"
+	len=${#txt}
+	len=$((len/2))
+	offset=$((num-len))
+	offset=$((offset/2))
+	space=">"
+	for (( i = 1; i < $offset; i++ )); do
+		space=`echo "$space "`
+	done
+	
+	space=`echo "${space}${txt}"`
 
+	for (( i = 1; i < $offset; i++ )); do
+		space=`echo "$space "`
+	done
+	space=`echo "$space<"`
+	printf "%s" "$space"
+}
 
 # function to create a select menu from an array
 # i didn't write this function! : https://unix.stackexchange.com/questions/146570/arrow-key-enter-menu -> Alexander Klimetschek
@@ -68,8 +86,13 @@ function selectOption {
     cursor_blink_on()  { printf "$ESC[?25h"; }
     cursor_blink_off() { printf "$ESC[?25l"; }
     cursor_to()        { printf "$ESC[$1;${2:-1}H"; }
-    print_option()     { center "$1"; }
-    print_selected()   { center "         $ESC[7m$1$ESC[27m"; }
+    print_selected() { 
+    	text=`spaces "$1"  "60"`
+    	air=`printf "%s" "$text" |sed 's/[a-zA-z0-9]/ /g'`
+    	center "         $ESC[7m$air$ESC[27m"; 
+    	center "         $ESC[7m$text$ESC[27m"; 
+    	center "         $ESC[7m$air$ESC[27m"; 
+    }
     get_cursor_row()   { IFS=';' read -sdR -p $'\E[6n' ROW COL; echo ${ROW#*[}; }
     key_input()        { read -s -n3 key 2>/dev/null >&2
                          if [[ $key = $ESC[A ]]; then echo up;    fi
@@ -83,16 +106,23 @@ function selectOption {
     # ensure cursor and input echoing back on upon a ctrl+c during read -s
     trap "cursor_blink_on; stty echo; printf '\n'; exit" 2
     cursor_blink_off
+    stty -echo
     local selected=0
     while true; do
         # print options by overwriting the last lines
         local idx=0
         for opt; do
-            cursor_to $(($startrow + $idx))
             if [ $idx -eq $selected ]; then
+
+            	cursor_to $(($startrow))
+       			printf "\33[1;32m"
+            	center "You'r Selected : $# / "$((selected+1)) 
+            	cursor_to $(($startrow+2))
+            	center "`echo -n "{${options[*]}}" |sed 's/ / , /g' |sed 's/{/{ /g'|sed 's/}/ }/g'`"
+            	cursor_to $(($startrow + 4))
+       			printf "\33[0;%dm"  "$((RANDOM%7+31))"
                 print_selected "$opt"
-            else
-                print_option "$opt"
+       			printf "\33[0m"
             fi
             ((idx++))
         done
@@ -110,6 +140,7 @@ function selectOption {
     printf "\n"
     cursor_blink_on
     # return the selected index
+    stty echo
     return $selected
 }
 
@@ -162,14 +193,15 @@ function systemStatus {
 
 # function to print banner
 function printBanner {
-	echo -e "\n"
-	center "	${boldText}${bannerTextColor} ██████╗██╗     ██╗██████╗ ██╗███████╗${resetColor}"
-	center "	${boldText}${bannerTextColor}██╔════╝██║     ██║██╔══██╗██║██╔════╝${resetColor}"
-	center "	${boldText}${bannerTextColor}██║     ██║     ██║██║  ██║██║███████╗${resetColor}"
-	center "	${boldText}${bannerTextColor}██║     ██║     ██║██║  ██║██║╚════██║${resetColor}"
-	center "	${boldText}${bannerTextColor}╚██████╗███████╗██║██████╔╝██║███████║${resetColor}"
-	center "	${boldText}${bannerTextColor} ╚═════╝╚══════╝╚═╝╚═════╝ ╚═╝╚══════╝${resetColor}"
-	systemStatus
+	echo -e "\n${boldText}${bannerTextColor}"
+	center " ██████╗██╗     ██╗██████╗ ██╗███████╗"
+	center "██╔════╝██║     ██║██╔══██╗██║██╔════╝"
+	center "██║     ██║     ██║██║  ██║██║███████╗"
+	center "██║     ██║     ██║██║  ██║██║╚════██║"
+	center "╚██████╗███████╗██║██████╔╝██║███████║"
+	center " ╚═════╝╚══════╝╚═╝╚═════╝ ╚═╝╚══════╝"
+    echo "${resetColor}"	
+    systemStatus
 }
 
 
@@ -207,10 +239,22 @@ function containsElement {
   return 1
 }
 
+centerText (){
+  w=$(stty size | cut -d" " -f2)
+  b=`echo $1|sed -e 's/\${.*}//g'`
+  l=${#b} 
+  printf "%"$((  ((w/2)+l) - (l/3) ))"s" "$1" 
+}
+
+newline(){
+  echo ""
+}
 # function to create th menu list entries and controll them with config file
 function menuEntries {
 	# manual for user 
-	center "		${normalTextColor}Select an entry using ${importantTextColor}up/down${normalTextColor} keys and ${importantTextColor}enter${normalTextColor} to confirm:${resetColor}" 
+	centerText "${normalTextColor} Select an entry using ${importantTextColor} up/down ${normalTextColor} keys and ${importantTextColor}enter${normalTextColor} to confirm: ${resetColor}" 
+	newline
+	newline
 	# get all installed graphical evironments
 	desktops=$(ls /usr/share/xsessions/ | sed 's/.desktop//g')
 	staticEntries=("TTY" "reboot" "shutdown")
@@ -226,7 +270,6 @@ function menuEntries {
 		# set the options array as default
 		options=($desktops ${staticEntries[@]})
 	fi
-	center "++++++++++++++++"
 	# create select menu from options
 	selectOption "${options[@]}"
 	# set the user choice
