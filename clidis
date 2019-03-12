@@ -50,7 +50,27 @@ function center {
 	padding="$(printf '%0.0000001s' ' '{1..500})"
 	printf '%*.*s %s %*.*s\n' 0 "$(((termwidth-2-${#1})/2))" "$padding" "$1" 0 "$(((termwidth-1-${#1})/2))" "$padding"
 }
+# spaces function center text in space
+function spaces  {
+	txt="$1"
+	num="$2"
+	len=${#txt}
+	len=$((len/2))
+	offset=$((num-len))
+	offset=$((offset/2))
+	space=">"
+	for (( i = 1; i < $offset; i++ )); do
+		space=`echo "$space "`
+	done
+	
+	space=`echo "${space}${txt}"`
 
+	for (( i = 1; i < $offset; i++ )); do
+		space=`echo "$space "`
+	done
+	space=`echo "$space<"`
+	printf "%s" "$space"
+}
 
 # function to create a select menu from an array
 # i didn't write this function! : https://unix.stackexchange.com/questions/146570/arrow-key-enter-menu -> Alexander Klimetschek
@@ -66,8 +86,13 @@ function selectOption {
     cursor_blink_on()  { printf "$ESC[?25h"; }
     cursor_blink_off() { printf "$ESC[?25l"; }
     cursor_to()        { printf "$ESC[$1;${2:-1}H"; }
-    print_option()     { center "$1"; }
-    print_selected()   { center "         $ESC[7m$1$ESC[27m"; }
+    print_selected() { 
+    	text=`spaces "$1"  "60"`
+    	air=`printf "%s" "$text" |sed 's/[a-zA-z0-9]/ /g'`
+    	center "         $ESC[7m$air$ESC[27m"; 
+    	center "         $ESC[7m$text$ESC[27m"; 
+    	center "         $ESC[7m$air$ESC[27m"; 
+    }
     get_cursor_row()   { IFS=';' read -sdR -p $'\E[6n' ROW COL; echo ${ROW#*[}; }
     key_input()        { read -s -n3 key 2>/dev/null >&2
                          if [[ $key = $ESC[A ]]; then echo up;    fi
@@ -86,14 +111,17 @@ function selectOption {
         # print options by overwriting the last lines
         local idx=0
         for opt; do
-            cursor_to $(($startrow + $idx))
             if [ $idx -eq $selected ]; then
-       			printf "\33[%dm"  "$((RANDOM%7+31))"
-                print_selected "$opt"
-            else
 
-        		printf "\33[%dm"  "$((RANDOM%7+31))"
-                print_option "$opt"
+            	cursor_to $(($startrow))
+       			printf "\33[1;32m"
+            	center "You'r Selected : $# / "$((selected+1)) 
+            	cursor_to $(($startrow+2))
+            	center "`echo -n "{${options[*]}}" |sed 's/ / , /g' |sed 's/{/{ /g'|sed 's/}/ }/g'`"
+            	cursor_to $(($startrow + 4))
+       			printf "\33[1;2;%dm"  "$((RANDOM%7+31))"
+                print_selected "$opt"
+       			printf "\33[0m"
             fi
             ((idx++))
         done
