@@ -88,7 +88,7 @@ function selectOption {
     cursor_to()        { printf "$ESC[$1;${2:-1}H"; }
     print_selected() { 
     	text=`spaces "$1"  "60"`
-    	air=`printf "%s" "$text" |sed 's/[a-zA-z0-9]/ /g'`
+	air=$(sed -e 's/[a-zA-Z0-9]/ /g' <<< $text)
     	center "         $ESC[7m$air$ESC[27m"; 
     	center "         $ESC[7m$text$ESC[27m"; 
     	center "         $ESC[7m$air$ESC[27m"; 
