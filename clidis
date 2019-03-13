@@ -143,8 +143,16 @@ function selectOption {
     }
     get_cursor_row()   { IFS=';' read -sdR -p $'\E[6n' ROW COL; echo ${ROW#*[}; }
     key_input()        { read -s -n3 key 2>/dev/null >&2
-                         if [[ $key = $ESC[A ]]; then echo up;    fi
-                         if [[ $key = $ESC[B ]]; then echo down;  fi
+                         if [[ $key = $ESC[A ||
+							   $key = $ESC[0A||
+							   $key = $ESC[D ||
+							   $key = $ESC[0D  ]]; then echo up;    fi
+
+                         if [[ $key = $ESC[B 
+                         	|| $key = $ESC[0B 
+                            || $key = $ESC[C 
+                            || $key = $ESC[0C ]]; then echo down;  fi
+
                          if [[ $key = ""     ]]; then echo enter; fi; }
     # initially print empty new lines (scroll down if at bottom of screen)
     for opt; do printf "\n"; done
@@ -161,7 +169,6 @@ function selectOption {
         local idx=0
         for opt; do
             if [ $idx -eq $selected ]; then
-
             	cursor_to $(($startrow))
 				printf "\33[0;%dm" "$InfoDesktop"
             	center "You'r Selected : $# / "$((selected+1)) 
