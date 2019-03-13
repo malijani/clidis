@@ -300,7 +300,7 @@ function containsElement {
 # function to create th menu list entries and controll them with config file
 function menuEntries {
 	# manual for user 
-	centerText "${normalTextColor} Select an entry using ${importantTextColor} up/down or left/right ${normalTextColor} keys and ${importantTextColor}enter${normalTextColor} to confirm: ${resetColor}" 
+	centerText "${normalTextColor} Select an entry using ${importantTextColor} up/down ${normalTextColor} or ${importantTextColor} left/right ${normalTextColor} keys and ${importantTextColor}enter${normalTextColor} to confirm: ${resetColor}" 
 	newline
 	newline
 	# get all installed graphical evironments
