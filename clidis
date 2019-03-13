@@ -29,20 +29,23 @@ resetColor=$(tput sgr0)
 boldText=$(tput bold)
 
 #background main page 
-sysPageColor="47"
+sysPageColor="40"
 
 # color name text desktop and .... 
-InfoDesktop="35"
+InfoDesktop="36"
 
-colorBtnSelection="31"
+colorBtnSelection="34"
+
+#item color ; info message
+ItemColorSelect="32" 
 # normal text color
-[[ -z $normalTextColor ]] && normalTextColor=$(tput setaf 4)
+[[ -z $normalTextColor ]] && normalTextColor=$(tput setaf 5)
 # banner color
-[[ -z $bannerTextColor ]] && bannerTextColor=$(tput setaf 4)
+[[ -z $bannerTextColor ]] && bannerTextColor=$(tput setaf 6)
 # important text color
-[[ -z $importantTextColor ]] && importantTextColor=$(tput setaf 1)
+[[ -z $importantTextColor ]] && importantTextColor=$(tput setaf 2)
 # information text color
-[[ -z $informationTextColor ]] && informationTextColor=$(tput setaf 3)
+[[ -z $informationTextColor ]] && informationTextColor=$(tput setaf 6)
 
 # set variables for system status
 [[ -z $showStatus ]] && showStatus=1
@@ -135,7 +138,7 @@ function selectOption {
     cursor_blink_off() { printf "$ESC[?25l"; }
     cursor_to()        { printf "$ESC[$1;${2:-1}H"; }
     print_selected() { 
-    	text=`spaces "$1"  "60"`
+    	text=$(spaces "$1"  "60")
 		air=$(sed -e 's/[^ <>]/ /g' <<< $text)
     	center "         $ESC[7m$air$ESC[27m"; 
     	center "         $ESC[7m$text$ESC[27m"; 
@@ -169,15 +172,23 @@ function selectOption {
         local idx=0
         for opt; do
             if [ $idx -eq $selected ]; then
+
             	cursor_to $(($startrow))
 				printf "\33[0;%dm" "$InfoDesktop"
             	center "You'r Selected : $# / "$((selected+1)) 
+            	
             	cursor_to $(($startrow+2))
-            	center "`echo -n "{${options[*]}}" |sed 's/ / , /g' |sed 's/{/{ /g'|sed 's/}/ }/g'`"
+            	colorItemSelection=$(printf "\e[%dm" "$ItemColorSelect")
+            	colorpage=$(printf "\e[0;%d;%dm" "$sysPageColor" "$InfoDesktop")
+            	optionsInfo=$(echo -ne "\b\b{${options[*]}}" |sed 's/ / , /g' |sed 's/{/{ /g'|sed 's/}/ }/g')
+            	selectionItem=$(sed -e "s/$opt/${boldText}${colorItemSelection}&${colorpage}/g" <<< $optionsInfo)
+            	centerText "${selectionItem}"
+            	
             	cursor_to $(($startrow + 5))
        			printf "\33[%dm"  "$colorBtnSelection"
                 print_selected "$opt"
        			printf "\33[0m"
+            
             fi
             ((idx++))
         done
@@ -527,6 +538,8 @@ if [[ ! -z $1 && $1 == @(-t|--test-mode) ]] ; then
         # pass the desktop name or selected options to startDesktop function
         #echo "selected ${options[$choice]}"
         center " you selected \"${options[$choice]}\" item"
+        #clear and change background page 
+		pageColor "$sysPageColor" "clear"
 	exit
 fi
 
