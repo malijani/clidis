@@ -181,7 +181,7 @@ function selectOption {
             	colorItemSelection=$(printf "\e[%dm" "$ItemColorSelect")
             	colorpage=$(printf "\e[0;%d;%dm" "$sysPageColor" "$InfoDesktop")
             	optionsInfo=$(echo -ne "\b\b{${options[*]}}" |sed 's/ / , /g' |sed 's/{/{ /g'|sed 's/}/ }/g')
-            	selectionItem=$(sed -e "s/$opt/${boldText}${colorItemSelection}&${colorpage}/g" <<< $optionsInfo)
+		selectionItem=$(sed -e "s/ $opt /${boldText}${colorItemSelection}&${colorpage}/" <<< $optionsInfo)
             	centerText "${selectionItem}"
             	
             	cursor_to $(($startrow + 5))
