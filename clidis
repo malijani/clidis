@@ -175,7 +175,7 @@ function selectOption {
 
             	cursor_to $(($startrow))
 				printf "\33[0;%dm" "$InfoDesktop"
-            	center "You'r Selected : $# / "$((selected+1)) 
+            	center "You've selected : "$((selected+1))"/$#"
             	
             	cursor_to $(($startrow+2))
             	colorItemSelection=$(printf "\e[%dm" "$ItemColorSelect")
@@ -308,7 +308,7 @@ function containsElement {
   return 1
 }
 
-# function to create th menu list entries and controll them with config file
+# function to create the menu list entries and configure them with config file
 function menuEntries {
 	# manual for user 
 	centerText "${normalTextColor} Select an entry using ${importantTextColor} up/down ${normalTextColor} or ${importantTextColor} left/right ${normalTextColor} keys and ${importantTextColor}enter${normalTextColor} to confirm: ${resetColor}" 
@@ -371,14 +371,14 @@ function downloadClidis {
 
 # function to install clidis
 function installClidis {
-	# if clidis exist in working directory ask to download it or not
+	# if clidis exist in working directory ask to download
 	if [[ -e "$(pwd)/clidis" ]] ; then
 		while true; do
-                        read -p "clidis exist in working directory ! do you want to download latest version of clidis? [y/n] " yesOrNo
+                        read -p "clidis exists in the current working directory! Do you want to download the latest version of clidis? [y/n] " yesOrNo
                         case $yesOrNo in
-                                [Yy]* ) echo "downloading the latest version of clidis from github..." && downloadClidis && break
+                                [Yy]* ) echo "Downloading the latest version of clidis from github..." && downloadClidis && break
                                 ;;
-				[Nn]* ) echo "coping clidis to $HOME/.clidis" && cp "$(pwd)/clidis" $HOME/.clidis && break
+				[Nn]* ) echo "Copying clidis to $HOME/.clidis" && cp "$(pwd)/clidis" $HOME/.clidis && break
                                 ;;
                                 * ) echo "Please answer yes or no."
                                 ;;
@@ -395,9 +395,9 @@ function installClidis {
 		echo "systemDefaultDisplayManager=$systemDefaultDisplayManager" >> $configFile
 		sudo systemctl disable display-manager.service
 	else
-		# in this moment controller findout there's no display-manager is working on system....
+	        # systemctl can't find a display manager on the system
 		while true; do
-			read -p "I didn't find out any display manager working on your system(maybe it's already disabled)! do you wish to install clidis script? [y/n] " yesOrNo
+			read -p "I didn't find any display manager working on your system (maybe it's already disabled)! Do you wish to install clidis script? [y/n] " yesOrNo
     			case $yesOrNo in
         			[Yy]* ) echo "continuing..." ; break
 				;;
@@ -438,7 +438,7 @@ function installClidis {
 		read -p "Please give me your login shell profile path : " loginShellProfilePath
 	        echo $clidisAutoStartCommand >> $loginShellProfilePath
        	fi
-       	echo "done! please reboot your system to see what happend!"
+       	echo "done! please reboot your system to see what happened!"
 	exit
 }
 
@@ -479,21 +479,21 @@ function uninstallClidis {
 		if [[ $(grep "$clidisAutoStartCommand"  $HOME/.bash_profile) ]] ; then
 		       sed -i.bak "/clidis/d" $HOME/.bash_profile
 	       else
-		       echo "clidis doesn't enabled in $HOME/.bash_profile !"
+		       echo "clidis isn't enabled in $HOME/.bash_profile !"
 	       fi
 	elif [[ $(echo $SHELL | grep zsh) ]] ; then
 		[[ ! -e "$HOME/.zprofile" ]] && touch $HOME/.zprofile
 		if [[ $(grep "$clidisAutoStartCommand"  $HOME/.zprofile) ]] ; then
 			sed -i.bak "/clidis/d" $HOME/.zprofile 
 		else
-			echo "clidis doesn't enabled in $HOME/.zprofile !"
+			echo "clidis isn't enabled in $HOME/.zprofile !"
 		fi
 	elif [[ $(echo $SHELL | grep fish) ]] ; then
 		[[ ! -e "$HOME/.config/fish/config.fish" ]] && touch $HOME/.config/fish/config.fish
 	       	if [[ $(grep "$clidisAutoStartCommand"  $HOME/.config/fish/config.fish) ]] ; then
 		       	sed -i.bak "/clidis/d" $HOME/.config/fish/config.fish 
 		else
-			echo "clidis doesn't enabled in $HOME/.config/fish/config.fish !"
+			echo "clidis isn't enabled in $HOME/.config/fish/config.fish !"
 		fi
 	else
 		while true ; do
@@ -504,12 +504,12 @@ function uninstallClidis {
 			fi
 		done
 	fi
-	echo "done! please reboot your system to see what happend!"
+	echo "done! please reboot your system to see what happened!"
 	exit
 }
 
 
-# install clidis if there's -i or --install agument exist
+# install clidis if there's a -i or --install agument
 if [[ ! -z $1 && $1 = @(-i|--install) ]] ; then
 	# reset the terminal
 	tput reset
@@ -518,7 +518,7 @@ if [[ ! -z $1 && $1 = @(-i|--install) ]] ; then
 fi
 
 
-# uninstall clidis if there's -u or --uninstall argument exist
+# uninstall clidis if there's a -u or --uninstall argument
 if [[ ! -z $1 && $1 = @(-u|--uninstall) ]] ; then
 	# reset the terminal
 	tput reset
@@ -527,7 +527,7 @@ if [[ ! -z $1 && $1 = @(-u|--uninstall) ]] ; then
 fi
 
 
-# just test clidis to see what's happening in this script?....
+# Test clidis to see what it looks like if there's a -t or --test-mode argument
 if [[ ! -z $1 && $1 == @(-t|--test-mode) ]] ; then
         # reset the terminal
         tput reset
