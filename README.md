@@ -1,5 +1,5 @@
 # clidis
-A command line display manager to start your desktop more intractive!
+An interactive command line display manager!
 
 ![clidis preview](https://raw.githubusercontent.com/virtualdemon/clidis/master/screenshot/screenshot_v2.0.png)
 
@@ -32,9 +32,9 @@ After downloading the script you can just use `-t` or `--test-mode` to see what 
 
 ## CONFIGURATION
 
-The clidis configuartion is in **~/.config/clidis/config** you can tweak clidis alittle with defined variables! please don't mess with `systemDefaultDisplayManager` and `lastUserChoice` variable!
+The clidis configuartion is in **~/.config/clidis/config** you can tweak clidis a little with defined variables! please don't mess with `systemDefaultDisplayManager` and `lastUserChoice` variable!
 
-You can enable or disable showing system status under the clidis logo and tweak them. 0 is for disable and 1 is for enable.
+You can enable or disable showing system status under the clidis logo and tweak them (0 for disable and 1 for enable).
 
 ## MANUAL INSTALLATION
 
@@ -60,7 +60,7 @@ You can enable or disable showing system status under the clidis logo and tweak 
      
      `echo -e "if status --is-login\n\texec bash $HOME/.clidis\nend" >> $HOME/.config/fish/config.fish`
      
-    If you don't know what's your login shell, just run this command : 
+    If you don't know your login shell, just run this command : 
     
     `echo $SHELL`
 
