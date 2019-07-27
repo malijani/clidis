@@ -13,5 +13,6 @@ showTime=0
 showLinuxDistName=1
 showUptime=0
 
+runXinitrc=0
 
 lastUserChoice="i3"

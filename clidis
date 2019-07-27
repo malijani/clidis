@@ -23,7 +23,6 @@ else
 	mkdir -p $configPath 2>&1 > /dev/null && touch $configFile 2>&1 > /dev/null
 fi
 
-
 # set colors
 resetColor=$(tput sgr0)
 boldText=$(tput bold)
@@ -55,7 +54,8 @@ ItemColorSelect="32"
 [[ -z $showLinuxDisName ]] && showLinuxDistName=1
 [[ -z $showUptime ]] && showUptime=1
 
-
+# don't run xinitrc by default
+[[ -z $runXinitrc ]] && runXinitrc=0
 
 #move cursor in terminal  
 function gotoxy {
@@ -290,12 +290,15 @@ function startDesktop {
 		sleep 3
 		shutdown -h now
 	fi
-	if [ -e $HOME/.xinitrc ] ; then
-		mv $HOME/.xinitrc $HOME/.xinitrc-$(date +%m-%d-%H-%M-%S)-bak
-	fi		
 	# start chosen desktop environment from Exec command in .desktop file!
 	echo "${normalTextColor}starting $1 ! please wait... ${resetColor}"
-	execCommand=$(which $(grep "^Exec" /usr/share/xsessions/"$1".desktop | sed 's/Exec=//'))	
+	execCommand=$(which $(grep "^Exec" /usr/share/xsessions/"$1".desktop | sed 's/Exec=//'))
+	# for debian systems
+	if [[ "$runXinitrc" == 1 ]] && [[ -e "$HOME/.xsession" ]] ; then
+	    exec startx "$HOME/.xsession" "$execCommand" 2>&1 > /dev/null
+	elif [[ "$runXinitrc" == 1 ]] && [[ -e "$HOME/.xinitrc" ]] ; then
+	    exec startx "$HOME/.xinitrc" "$execCommand" 2>&1 > /dev/null
+	fi
 	exec startx "$execCommand" 2>&1 > /dev/null
 }
 

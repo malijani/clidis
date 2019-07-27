@@ -32,7 +32,7 @@ After downloading the script you can just use `-t` or `--test-mode` to see what 
 
 ## CONFIGURATION
 
-The clidis configuartion is in **~/.config/clidis/config** you can tweak clidis a little with defined variables! please don't mess with `systemDefaultDisplayManager` and `lastUserChoice` variable!
+The clidis configuration is in **~/.config/clidis/config** you can tweak clidis a little with defined variables! please don't mess with `systemDefaultDisplayManager` and `lastUserChoice` variable!
 
 You can enable or disable showing system status under the clidis logo and tweak them (0 for disable and 1 for enable).
 
@@ -80,11 +80,11 @@ You can enable or disable showing system status under the clidis logo and tweak 
 
 * Added config file
 
-* Added automatical install and remove option
+* Added automatic install and remove option
 
 * Added test option
 
-* Added intractive selection menu and ui
+* Added interactive selection menu and ui
 
 * Script will remember last user choice
 
