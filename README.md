@@ -1,17 +1,17 @@
 # clidis
 An interactive command line display manager!
 
-![clidis preview](https://raw.githubusercontent.com/virtualdemon/clidis/master/screenshot/screenshot_v2.0.png)
+![clidis preview](./screenshot/screenshot_v2.0.png)
 
-![RepoSize](https://img.shields.io/github/repo-size/virtualdemon/clidis.svg?style=flat-square) ![Contributors](https://img.shields.io/github/contributors/virtualdemon/clidis.svg?style=flat-square)
+![RepoSize](https://img.shields.io/github/repo-size/malijani/clidis.svg?style=flat-square) ![Contributors](https://img.shields.io/github/contributors/malijani/clidis.svg?style=flat-square)
     
 ## AUTOMATIC INSTALLATION
 
 1. Download the script with `curl` or `wget` : 
 	
-    `wget https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -O clidis`
+    `wget https://raw.githubusercontent.com/malijani/clidis/master/clidm/clidis -O clidis`
 
-	`curl https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -o clidis`
+	`curl https://raw.githubusercontent.com/malijani/clidis/master/clidm/clidis -o clidis`
 	        
 2. Change script permission : 
 
@@ -40,9 +40,9 @@ You can enable or disable showing system status under the clidis logo and tweak 
 
 1. Download the script with `curl` or `wget` into your home directory : 
 	
-    `wget https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -O ~/.clidis`
+    `wget https://raw.githubusercontent.com/malijani/clidis/master/clidm/clidis -O ~/.clidis`
 
-	`curl https://raw.githubusercontent.com/virtualdemon/clidis/master/clidis -o clidis`
+	`curl https://raw.githubusercontent.com/malijani/clidis/master/clidm/clidis -o clidis`
 	        
 2. Change script permission : 
 
